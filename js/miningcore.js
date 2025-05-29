@@ -175,9 +175,24 @@ function loadHomePage() {
 		poolCoinTableTemplate += "<td class='miners'>" + value.poolStats.connectedMiners + "</td>";
 		poolCoinTableTemplate += "<td class='pool-hash'>" + _formatter(value.poolStats.poolHashrate, 5, "H/s") + "</td>";
 		poolCoinTableTemplate += "<td class='fee'>" + value.poolFeePercent + " %</td>";
-		poolCoinTableTemplate += "<td class='net-hash'>" + _formatter(value.networkStats.networkHashrate, 5, "H/s") + "</td>";
-		poolCoinTableTemplate += "<td class='net-diff'>" + _formatter(value.networkStats.networkDifficulty, 5, "") + "</td>";
-		poolCoinTableTemplate += "<td class='card-btn col-hide'>Go Mine " + coinLogo + coinName + "</td>";
+                poolCoinTableTemplate += "<td class='net-hash'>" + _formatter(value.networkStats.networkHashrate, 5, "H/s") + "</td>";
+                poolCoinTableTemplate += "<td class='net-diff'>" + _formatter(value.networkStats.networkDifficulty, 5, "") + "</td>";
+
+                var lastFound = "n/a";
+                var lastTime = value.lastPoolBlockTime || (value.poolStats ? value.poolStats.lastPoolBlockTime : null);
+                if(lastTime){
+                    var diffSec = (new Date().getTime() - new Date(lastTime).getTime()) / 1000;
+                    lastFound = _timeSince(diffSec);
+                }
+                poolCoinTableTemplate += "<td class='last-found'>" + lastFound + "</td>";
+
+                var dominance = "n/a";
+                if(value.networkStats.networkHashrate > 0){
+                    dominance = ((value.poolStats.poolHashrate / value.networkStats.networkHashrate) * 100).toFixed(2) + " %";
+                }
+                poolCoinTableTemplate += "<td class='net-dom'>" + dominance + "</td>";
+
+                poolCoinTableTemplate += "<td class='card-btn col-hide'>Go Mine " + coinLogo + coinName + "</td>";
 		poolCoinTableTemplate += "</tr>";
       });
 
@@ -528,6 +543,18 @@ function convertUTCDateToLocalDate(date) {
     var hours = date.getUTCHours();
     newDate.setHours(hours - localOffset);
     return newDate;
+}
+
+// Format time difference in a short human readable form
+function _timeSince(seconds) {
+    seconds = Math.floor(seconds);
+    var interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return interval + " d";
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return interval + " h";
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return interval + " m";
+    return Math.floor(seconds) + " s";
 }
 
 
